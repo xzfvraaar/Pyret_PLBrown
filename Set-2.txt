@@ -1,0 +1,17 @@
+Working with Stream
+
+
+1. Create a function powers-of-2 that returns a stream of powers of 2
+
+2. Create a function multiples-of that accepts a number n and produces a stream of multiples n
+
+3. Create a function color-cycle that produces a stream representing the color-cycle of a 
+	traffuc ligh (Green, Yellow, Red)
+
+	Example:
+		> take(10, color-cycle())
+		[ list: Green, Yellow, Red, Green, Yellow, Red, Green, Yellow, Red, Green]
+
+	Use this data definition for color:
+
+	data Color: Green | Yellow | Red end
