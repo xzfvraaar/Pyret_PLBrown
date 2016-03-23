@@ -1,9 +1,68 @@
-Working with Stream
+Working with Streams
+
+###### utility functions ######
+
+##stream definition
+data Stream<T>:
+  | lz-link(first :: T, rest :: ( -> Stream<T>))
+end
+
+##get first element in stream
+fun lz-first<T>(stream :: Stream<T>) -> T:
+  stream.first 
+end
+
+##get rest of the elements on a stream
+fun lz-rest<T>(stream :: Stream<T>) -> T:
+  stream.rest()
+end
+
+##base
+fun nats-from(n):
+  lz-link(n, lam(): nats-from(n + 1) end)
+end
+
+##prefix
+fun take<T>(n :: Number, s :: Stream<T>) -> List<T>:
+  if n == 0 : empty
+  else:
+    link(lz-first(s), take(n - 1, lz-rest(s)))
+  end
+end
+
+## modified
+fun lz-map<A, B>(f :: (A, A -> B), s1 :: Stream<A>, s2 :: Stream<A>) -> Stream<B>:
+  lz-link(f(lz-first(s1), lz-rest(s2).first),
+    lam(): lz-map(f, s1, lz-rest(s2)) end)
+end
+
+
 
 
 1. Create a function powers-of-2 that returns a stream of powers of 2
 
+fun power-of-2():
+  lz-link(2, lam():
+      lz-link(lz-first(power-of-2()) * 2, lam():
+      lz-map(_ * _, power-of-2(), power-of-2()) end) end)
+  where:
+  ## zero power not included
+  take(5, power-of-2()) is [list:2, 4, 8, 16, 32]
+  take(10, power-of-2()) is [list:2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
+  take(0, power-of-2()) is [list:]
+end
+
 2. Create a function multiples-of that accepts a number n and produces a stream of multiples n
+
+fun multiples-of(n):
+  lz-link(n, lam():
+      lz-link( lz-first(multiples-of(n)) + n, lam():
+      lz-map(_ + _, multiples-of(n), multiples-of(n)) end) end )
+  where:
+  take(5, multiples-of(2)) is [list:2,4,6,8,10]
+  take(10, multiples-of(1)) is [list:1,2,3,4,5,6,7,8,9,10]
+  take(0, multiples-of(3)) is [list:]
+end
 
 3. Create a function color-cycle that produces a stream representing the color-cycle of a 
 	traffuc ligh (Green, Yellow, Red)
@@ -15,3 +74,28 @@ Working with Stream
 	Use this data definition for color:
 
 	data Color: Green | Yellow | Red end
+
+data Color: Green | Yellow | Red end
+
+
+(dummy approach)
+# you can already hard code Green, Yellow, Red on the respective 1st arguments of the nested lz-link(s)
+fun color-cycle():
+  lz-link(Green, lam():
+    lz-link(test(lz-first(color-cycle())), lam():
+          lz-link(test(lz-rest(color-cycle()).first), lam():
+          color-cycle() end) end) end)
+where:
+  take(0, color-cycle()) is [list:]
+  take(10, color-cycle()) is
+  [list: Green, Yellow, Red, Green, Yellow, Red, Green, Yellow, Red, Green]
+  take(5, color-cycle()) is [list: Green, Yellow, Red, Green, Yellow]
+end
+
+fun test(c :: Color) -> Color:
+  cases(Color) c:
+    | Green => Yellow
+    | Yellow => Red
+    | Red => Green
+  end
+end
